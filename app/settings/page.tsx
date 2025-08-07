@@ -149,7 +149,7 @@ export default function SettingsPage() {
 
       <Grid container spacing={3}>
         {/* Şifre Değiştirme */}
-        <Grid item xs={12} md={6} component="div">
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
@@ -207,7 +207,7 @@ export default function SettingsPage() {
         </Grid>
 
         {/* Bildirim Ayarları */}
-        <Grid item xs={12} md={6} component="div">
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
@@ -289,7 +289,7 @@ export default function SettingsPage() {
         </Grid>
 
         {/* Gizlilik Ayarları */}
-        <Grid item xs={12} md={6} component="div">
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
@@ -354,7 +354,7 @@ export default function SettingsPage() {
         </Grid>
 
         {/* Hesap Yönetimi */}
-        <Grid item xs={12} md={6} component="div">
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
