@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Container,
   Paper,
@@ -13,11 +14,15 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Alert,
 } from '@mui/material';
 import NextLink from 'next/link';
 import { RegisterForm } from '../../types';
+import { useAuthStore } from '../../store/authStore';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { login } = useAuthStore();
   const [formData, setFormData] = useState<RegisterForm>({
     name: '',
     email: '',
@@ -25,11 +30,37 @@ export default function RegisterPage() {
     confirmPassword: '',
     role: 'user',
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement register logic
-    console.log('Register attempt:', formData);
+    setError('');
+
+    // Şifre kontrolü
+    if (formData.password !== formData.confirmPassword) {
+      setError('Şifreler eşleşmiyor!');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Şifre en az 6 karakter olmalıdır!');
+      return;
+    }
+
+    setIsLoading(true);
+
+    // Simüle edilmiş kayıt işlemi
+    setTimeout(() => {
+      // Başarılı kayıt
+      login({
+        email: formData.email,
+        name: formData.name,
+        role: formData.role,
+      });
+      router.push('/dashboard');
+      setIsLoading(false);
+    }, 1000);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +100,14 @@ export default function RegisterPage() {
           <Typography component="h1" variant="h5">
             Kayıt Ol
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
             <TextField
               margin="normal"
               required
@@ -135,9 +173,10 @@ export default function RegisterPage() {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={isLoading}
               sx={{ mt: 3, mb: 2 }}
             >
-              Kayıt Ol
+              {isLoading ? 'Kayıt Oluşturuluyor...' : 'Kayıt Ol'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link component={NextLink} href="/login" variant="body2">

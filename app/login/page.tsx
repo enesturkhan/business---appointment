@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Container,
   Paper,
@@ -9,20 +10,58 @@ import {
   Typography,
   Box,
   Link,
+  Alert,
 } from '@mui/material';
 import NextLink from 'next/link';
 import { LoginForm } from '../../types';
+import { useAuthStore } from '../../store/authStore';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuthStore();
   const [formData, setFormData] = useState<LoginForm>({
     email: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log('Login attempt:', formData);
+    setError('');
+    setIsLoading(true);
+
+    // Simüle edilmiş giriş kontrolü
+    setTimeout(() => {
+      if (formData.email === 'admin@test.com' && formData.password === '123456') {
+        // Admin kullanıcısı
+        login({
+          email: 'admin@test.com',
+          name: 'Admin Kullanıcı',
+          role: 'admin',
+        });
+        router.push('/dashboard');
+      } else if (formData.email === 'user@test.com' && formData.password === '123456') {
+        // Normal kullanıcı
+        login({
+          email: 'user@test.com',
+          name: 'Test Kullanıcı',
+          role: 'user',
+        });
+        router.push('/dashboard');
+      } else if (formData.email === 'business@test.com' && formData.password === '123456') {
+        // İşletme sahibi
+        login({
+          email: 'business@test.com',
+          name: 'İşletme Sahibi',
+          role: 'business',
+        });
+        router.push('/dashboard');
+      } else {
+        setError('E-posta veya şifre hatalı!');
+      }
+      setIsLoading(false);
+    }, 1000);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +94,14 @@ export default function LoginPage() {
           <Typography component="h1" variant="h5">
             Giriş Yap
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+          
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
             <TextField
               margin="normal"
               required
@@ -84,15 +130,28 @@ export default function LoginPage() {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={isLoading}
               sx={{ mt: 3, mb: 2 }}
             >
-              Giriş Yap
+              {isLoading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link component={NextLink} href="/register" variant="body2">
                 {"Hesabınız yok mu? Kayıt Olun"}
               </Link>
             </Box>
+          </Box>
+
+          {/* Test Kullanıcıları */}
+          <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.100', borderRadius: 1, width: '100%' }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Test Kullanıcıları:
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+              Admin: admin@test.com / 123456<br />
+              Kullanıcı: user@test.com / 123456<br />
+              İşletme: business@test.com / 123456
+            </Typography>
           </Box>
         </Paper>
       </Box>

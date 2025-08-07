@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Container,
   Typography,
@@ -9,15 +11,68 @@ import {
   CardContent,
   CardActions,
   Button,
+  Chip,
 } from '@mui/material';
-import { CalendarToday, Business, Person } from '@mui/icons-material';
+import { CalendarToday, Business, Person, Settings } from '@mui/icons-material';
+import { useAuthStore } from '../../store/authStore';
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return null; // Loading state
+  }
+
+  const getRoleText = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'Yönetici';
+      case 'business':
+        return 'İşletme Sahibi';
+      case 'user':
+        return 'Kullanıcı';
+      default:
+        return role;
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'error';
+      case 'business':
+        return 'warning';
+      case 'user':
+        return 'primary';
+      default:
+        return 'default';
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Kontrol Paneli
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Hoş Geldiniz, {user?.name}!
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Chip 
+            label={getRoleText(user?.role || 'user')} 
+            color={getRoleColor(user?.role || 'user') as any}
+            size="small"
+          />
+          <Typography variant="body2" color="text.secondary">
+            {user?.email}
+          </Typography>
+        </Box>
+      </Box>
       
       <Grid container spacing={3}>
         {/* Quick Actions */}
@@ -64,12 +119,15 @@ export default function DashboardPage() {
                 Son Randevular
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Randevu bulunamadı. İlk randevunuzu alın!
+                {user?.role === 'business' 
+                  ? 'Henüz randevu talebi bulunmuyor.'
+                  : 'Randevu bulunamadı. İlk randevunuzu alın!'
+                }
               </Typography>
             </CardContent>
             <CardActions>
               <Button size="small" color="primary">
-                Tüm Randevuları Görüntüle
+                {user?.role === 'business' ? 'Tüm Talepleri Görüntüle' : 'Tüm Randevuları Görüntüle'}
               </Button>
             </CardActions>
           </Card>
@@ -89,7 +147,7 @@ export default function DashboardPage() {
                       0
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Toplam Randevu
+                      {user?.role === 'business' ? 'Toplam Talep' : 'Toplam Randevu'}
                     </Typography>
                   </Box>
                 </Grid>
@@ -117,6 +175,53 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Role Specific Actions */}
+        {user?.role === 'admin' && (
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  Yönetici Paneli
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <Button variant="outlined" startIcon={<Settings />}>
+                    Kullanıcıları Yönet
+                  </Button>
+                  <Button variant="outlined" startIcon={<Business />}>
+                    İşletmeleri Yönet
+                  </Button>
+                  <Button variant="outlined" startIcon={<CalendarToday />}>
+                    Sistem Ayarları
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
+
+        {user?.role === 'business' && (
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  İşletme Yönetimi
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <Button variant="outlined" startIcon={<Business />}>
+                    İşletme Bilgileri
+                  </Button>
+                  <Button variant="outlined" startIcon={<CalendarToday />}>
+                    Hizmetleri Yönet
+                  </Button>
+                  <Button variant="outlined" startIcon={<Settings />}>
+                    Çalışma Saatleri
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
       </Grid>
     </Container>
   );
