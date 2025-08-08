@@ -88,17 +88,19 @@ export default function DashboardPage() {
                   fullWidth
                   startIcon={<CalendarToday />}
                   sx={{ mb: 1 }}
+                  onClick={() => router.push('/appointments/create')}
                 >
                   Randevu Al
                 </Button>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  startIcon={<Business />}
-                  sx={{ mb: 1 }}
-                >
-                  İşletme Bul
-                </Button>
+                                           <Button
+                             variant="outlined"
+                             fullWidth
+                             startIcon={<Business />}
+                             sx={{ mb: 1 }}
+                             onClick={() => router.push('/search')}
+                           >
+                             İşletme Bul
+                           </Button>
                 <Button
                   variant="outlined"
                   fullWidth
@@ -126,7 +128,11 @@ export default function DashboardPage() {
               </Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" color="primary">
+              <Button 
+                size="small" 
+                color="primary"
+                onClick={() => router.push('/appointments/history')}
+              >
                 {user?.role === 'business' ? 'Tüm Talepleri Görüntüle' : 'Tüm Randevuları Görüntüle'}
               </Button>
             </CardActions>
