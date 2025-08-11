@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Container,
@@ -15,19 +15,34 @@ import {
 } from '@mui/material';
 import { CalendarToday, Business, Person, Settings } from '@mui/icons-material';
 import { useAuthStore } from '../../store/authStore';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
+    } else {
+      // Simüle edilmiş veri yükleme
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
   }, [isAuthenticated, router]);
 
   if (!isAuthenticated) {
-    return null; // Loading state
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <LoadingSpinner message="Dashboard yükleniyor..." />
+      </Container>
+    );
   }
 
   const getRoleText = (role: string) => {

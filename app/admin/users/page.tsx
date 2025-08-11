@@ -44,6 +44,8 @@ import {
 } from '@mui/icons-material';
 import { DeleteConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { useNotifications } from '@/components/ui/NotificationSystem';
+import LoadingSpinner, { TableLoadingSkeleton } from '@/components/ui/LoadingSpinner';
+import { DataError, EmptyState } from '@/components/ui/ErrorComponents';
 
 // User interface for type safety
 interface User {
@@ -163,6 +165,9 @@ export default function UserManagement() {
   const [page, setPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const rowsPerPage = 10;
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, user: User) => {
@@ -175,9 +180,18 @@ export default function UserManagement() {
     setSelectedUser(null);
   };
 
-  const handleEdit = () => {
-    setEditDialogOpen(true);
-    handleMenuClose();
+  const handleEdit = async () => {
+    setIsEditing(true);
+    try {
+      // Simüle edilmiş API çağrısı
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setEditDialogOpen(true);
+      handleMenuClose();
+    } catch (error) {
+      showError('Kullanıcı bilgileri yüklenirken bir hata oluştu!');
+    } finally {
+      setIsEditing(false);
+    }
   };
 
   const handleDelete = (user: User) => {
@@ -186,12 +200,22 @@ export default function UserManagement() {
     setAnchorEl(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (userToDelete) {
-      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
-      showSuccess(`${userToDelete.name} kullanıcısı başarıyla silindi!`);
-      setDeleteDialogOpen(false);
-      setUserToDelete(null);
+      setIsDeleting(true);
+      try {
+        // Simüle edilmiş API çağrısı
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+        showSuccess(`${userToDelete.name} kullanıcısı başarıyla silindi!`);
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+      } catch (error) {
+        showError('Kullanıcı silinirken bir hata oluştu!');
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 

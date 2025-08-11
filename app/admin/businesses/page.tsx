@@ -51,6 +51,7 @@ import {
   Email as EmailIcon,
   Star as StarIcon,
 } from '@mui/icons-material';
+import LoadingSpinner, { TableLoadingSkeleton } from '@/components/ui/LoadingSpinner';
 
 // Mock data - gerçek uygulamada API'den gelecek
 const mockBusinesses = [
@@ -187,6 +188,9 @@ export default function BusinessesManagement() {
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const rowsPerPage = 10;
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, business: any) => {
@@ -654,12 +658,22 @@ export default function BusinessesManagement() {
           <Button 
             variant="contained" 
             color="success"
-            onClick={() => {
-              console.log('Approve business:', selectedBusiness);
-              setApprovalDialogOpen(false);
+            disabled={isApproving}
+            onClick={async () => {
+              setIsApproving(true);
+              try {
+                // Simüle edilmiş API çağrısı
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                console.log('Approve business:', selectedBusiness);
+                setApprovalDialogOpen(false);
+              } catch (error) {
+                console.error('Approval failed:', error);
+              } finally {
+                setIsApproving(false);
+              }
             }}
           >
-            Onayla
+            {isApproving ? 'Onaylanıyor...' : 'Onayla'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { useThemeStore } from '../store/themeStore';
 import { NotificationProvider } from '../components/ui/NotificationSystem';
+import ErrorBoundary from '../components/ui/ErrorBoundary';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Geist } from "next/font/google";
@@ -145,7 +146,7 @@ export default function RootLayoutContent({
         >
           <Navbar />
           <Box component="main" sx={{ flexGrow: 1 }}>
-            {children}
+            <ErrorBoundary>{children}</ErrorBoundary>
           </Box>
           <Footer />
         </Box>
