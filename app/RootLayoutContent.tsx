@@ -3,6 +3,7 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { useThemeStore } from '../store/themeStore';
+import { NotificationProvider } from '../components/ui/NotificationSystem';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Geist } from "next/font/google";
@@ -134,19 +135,21 @@ export default function RootLayoutContent({
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-        }}
-      >
-        <Navbar />
-        <Box component="main" sx={{ flexGrow: 1 }}>
-          {children}
+      <NotificationProvider>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+          }}
+        >
+          <Navbar />
+          <Box component="main" sx={{ flexGrow: 1 }}>
+            {children}
+          </Box>
+          <Footer />
         </Box>
-        <Footer />
-      </Box>
+      </NotificationProvider>
     </ThemeProvider>
   );
 }
