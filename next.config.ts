@@ -3,9 +3,6 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   // Performance optimizations
   experimental: {
-    // Enable modern JavaScript features
-    esmExternals: 'loose',
-    
     // Optimize package imports
     optimizePackageImports: [
       '@mui/material',
@@ -16,9 +13,6 @@ const nextConfig: NextConfig = {
     
     // Enable webpack bundle analyzer
     webpackBuildWorker: true,
-    
-    // Enable SWC minification
-    swcMinify: true,
   },
 
   // Image optimization
@@ -39,9 +33,6 @@ const nextConfig: NextConfig = {
 
   // React strict mode
   reactStrictMode: true,
-
-  // SWC configuration
-  swcMinify: true,
 
   // Webpack configuration
   webpack: (config, { dev, isServer }) => {

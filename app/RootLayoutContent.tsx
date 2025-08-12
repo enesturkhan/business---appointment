@@ -22,7 +22,7 @@ export default function RootLayoutContent({
 }>) {
   const { mode } = useThemeStore();
 
-  const theme = createTheme({
+    const theme = createTheme({
     palette: {
       mode,
       primary: {
@@ -76,32 +76,32 @@ export default function RootLayoutContent({
       h1: {
         fontWeight: 700,
         letterSpacing: '-0.02em',
-        [theme.breakpoints.down('md')]: {
+        '@media (max-width:900px)': {
           fontSize: '2rem',
         },
-        [theme.breakpoints.down('sm')]: {
+        '@media (max-width:600px)': {
           fontSize: '1.75rem',
         },
       },
       h2: {
         fontWeight: 600,
         letterSpacing: '-0.01em',
-        [theme.breakpoints.down('md')]: {
+        '@media (max-width:900px)': {
           fontSize: '1.75rem',
         },
-        [theme.breakpoints.down('sm')]: {
+        '@media (max-width:600px)': {
           fontSize: '1.5rem',
         },
       },
       h3: {
         fontWeight: 600,
-        [theme.breakpoints.down('sm')]: {
+        '@media (max-width:600px)': {
           fontSize: '1.25rem',
         },
       },
       h4: {
         fontWeight: 600,
-        [theme.breakpoints.down('sm')]: {
+        '@media (max-width:600px)': {
           fontSize: '1.125rem',
         },
       },
@@ -112,12 +112,12 @@ export default function RootLayoutContent({
         fontWeight: 600,
       },
       body1: {
-        [theme.breakpoints.down('sm')]: {
+        '@media (max-width:600px)': {
           fontSize: '0.875rem',
         },
       },
       body2: {
-        [theme.breakpoints.down('sm')]: {
+        '@media (max-width:600px)': {
           fontSize: '0.8125rem',
         },
       },
@@ -133,7 +133,7 @@ export default function RootLayoutContent({
             fontWeight: 600,
             borderRadius: 8,
             padding: '10px 24px',
-            [theme.breakpoints.down('sm')]: {
+            '@media (max-width:600px)': {
               padding: '8px 16px',
               fontSize: '0.875rem',
             },
@@ -149,7 +149,7 @@ export default function RootLayoutContent({
       MuiCard: {
         styleOverrides: {
           root: {
-            [theme.breakpoints.down('sm')]: {
+            '@media (max-width:600px)': {
               borderRadius: 8,
             },
           },
@@ -158,7 +158,7 @@ export default function RootLayoutContent({
       MuiTextField: {
         styleOverrides: {
           root: {
-            [theme.breakpoints.down('sm')]: {
+            '@media (max-width:600px)': {
               '& .MuiInputBase-root': {
                 fontSize: '0.875rem',
               },
@@ -169,7 +169,7 @@ export default function RootLayoutContent({
       MuiTable: {
         styleOverrides: {
           root: {
-            [theme.breakpoints.down('md')]: {
+            '@media (max-width:900px)': {
               '& .MuiTableCell-root': {
                 padding: '8px 4px',
                 fontSize: '0.75rem',
@@ -181,7 +181,7 @@ export default function RootLayoutContent({
       MuiDialog: {
         styleOverrides: {
           paper: {
-            [theme.breakpoints.down('sm')]: {
+            '@media (max-width:600px)': {
               margin: 16,
               width: 'calc(100% - 32px)',
             },
