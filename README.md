@@ -1,36 +1,146 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# İş Randevu Sistemi - Frontend
 
-## Getting Started
+Modern React ve Next.js ile geliştirilmiş iş randevu sistemi frontend uygulaması.
 
-First, run the development server:
+## 🚀 Özellikler
+
+- **Modern Tech Stack**: React 18, Next.js 15, TypeScript
+- **UI Framework**: Material-UI (MUI) v6
+- **State Management**: Zustand
+- **Responsive Design**: Mobile-first yaklaşım
+- **Accessibility**: WCAG 2.1 uyumlu
+- **Performance**: Lazy loading, virtualization, memoization
+- **Testing**: Jest, React Testing Library
+- **Code Quality**: ESLint, Prettier, Husky
+
+## 🛠️ Kurulum
 
 ```bash
+# Dependencies yükle
+npm install
+
+# Development server başlat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Production build
+npm run build
+
+# Production server başlat
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧪 Testing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Tüm testleri çalıştır
+npm test
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Test coverage
+npm run test:coverage
 
-## Learn More
+# Watch mode
+npm run test:watch
 
-To learn more about Next.js, take a look at the following resources:
+# CI testing
+npm run test:ci
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔍 Code Quality
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Linting
+npm run lint
 
-## Deploy on Vercel
+# Linting with auto-fix
+npm run lint:fix
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Code formatting
+npm run format
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Format check
+npm run format:check
+```
+
+## 📁 Proje Yapısı
+
+```
+├── app/                    # Next.js app router
+│   ├── admin/            # Admin sayfaları
+│   ├── ui-demo/          # Demo sayfaları
+│   └── ...
+├── components/            # React bileşenleri
+│   ├── ui/               # UI bileşenleri
+│   └── ...
+├── hooks/                 # Custom React hooks
+├── store/                 # Zustand stores
+├── utils/                 # Utility fonksiyonları
+├── __tests__/            # Test dosyaları
+└── ...
+```
+
+## 🎯 Test Coverage
+
+- **Unit Tests**: Component ve hook testing
+- **Integration Tests**: Store ve API testing
+- **E2E Tests**: User journey testing
+- **Coverage Target**: >70%
+
+## 🔧 Development Tools
+
+- **ESLint**: Code linting ve quality
+- **Prettier**: Code formatting
+- **Husky**: Git hooks
+- **Lint-staged**: Pre-commit checks
+
+## 📱 Responsive Design
+
+- **Mobile**: 480px ve altı
+- **Tablet**: 768px ve altı
+- **Desktop**: 1024px ve üstü
+
+## ♿ Accessibility
+
+- **ARIA Labels**: Screen reader support
+- **Keyboard Navigation**: Tab navigation
+- **Focus Management**: Focus trap ve focus order
+- **Color Contrast**: WCAG AA uyumlu
+
+## ⚡ Performance
+
+- **Code Splitting**: Dynamic imports
+- **Lazy Loading**: Image ve component lazy loading
+- **Virtualization**: Large list rendering
+- **Memoization**: Expensive calculation caching
+- **Bundle Optimization**: Webpack chunk splitting
+
+## 🚀 Deployment
+
+```bash
+# Production build
+npm run build
+
+# Start production server
+npm start
+
+# Environment variables
+NEXT_PUBLIC_API_URL=your_api_url
+```
+
+## 📊 Bundle Analysis
+
+```bash
+# Bundle analyzer (development only)
+ANALYZE=true npm run build
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Create Pull Request
+
+## 📄 License
+
+MIT License - see LICENSE file for details

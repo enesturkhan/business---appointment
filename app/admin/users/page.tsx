@@ -20,17 +20,20 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
   Avatar,
   Badge,
   Tooltip,
   Pagination,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  useTheme,
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -154,6 +157,8 @@ const getRoleText = (role: User['role']) => {
 
 export default function UserManagement() {
   const { showSuccess, showError, showWarning } = useNotifications();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState('');
@@ -259,56 +264,86 @@ export default function UserManagement() {
       {/* Filters and Search */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Box 
+            component="form"
+            role="search"
+            aria-label="Kullanıcı arama ve filtreleme"
+            sx={{ 
+              display: 'flex', 
+              gap: { xs: 1, sm: 2 }, 
+              flexWrap: 'wrap', 
+              alignItems: 'center',
+              flexDirection: { xs: 'column', sm: 'row' },
+            }}
+          >
             <TextField
               placeholder="Kullanıcı ara..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Kullanıcı adı veya e-posta ile ara"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon />
+                    <SearchIcon aria-hidden="true" />
                   </InputAdornment>
                 ),
               }}
-              sx={{ minWidth: 300 }}
+              sx={{ 
+                minWidth: { xs: '100%', sm: 300 },
+                width: { xs: '100%', sm: 'auto' },
+              }}
             />
             
-            <FormControl sx={{ minWidth: 150 }}>
-              <InputLabel>Durum</InputLabel>
+            <FormControl sx={{ 
+              minWidth: { xs: '100%', sm: 150 },
+              width: { xs: '100%', sm: 'auto' },
+            }}>
+              <InputLabel id="role-filter-label">Rol</InputLabel>
               <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                label="Durum"
-              >
-                <MenuItem value="all">Tümü</MenuItem>
-                <MenuItem value="active">Aktif</MenuItem>
-                <MenuItem value="suspended">Askıya Alınmış</MenuItem>
-                <MenuItem value="pending">Beklemede</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl sx={{ minWidth: 150 }}>
-              <InputLabel>Rol</InputLabel>
-              <Select
+                labelId="role-filter-label"
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
                 label="Rol"
+                aria-label="Kullanıcı rolüne göre filtrele"
               >
                 <MenuItem value="all">Tümü</MenuItem>
                 <MenuItem value="user">Kullanıcı</MenuItem>
                 <MenuItem value="business_owner">İşletme Sahibi</MenuItem>
-                <MenuItem value="admin">Yönetici</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl sx={{ 
+              minWidth: { xs: '100%', sm: 150 },
+              width: { xs: '100%', sm: 'auto' },
+            }}>
+              <InputLabel id="status-filter-label">Durum</InputLabel>
+              <Select
+                labelId="status-filter-label"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                label="Durum"
+                aria-label="Kullanıcı durumuna göre filtrele"
+              >
+                <MenuItem value="all">Tümü</MenuItem>
+                <MenuItem value="active">Aktif</MenuItem>
+                <MenuItem value="inactive">Pasif</MenuItem>
+                <MenuItem value="blocked">Engellenmiş</MenuItem>
               </Select>
             </FormControl>
 
             <Button
               variant="outlined"
-              startIcon={<FilterListIcon />}
+              startIcon={<FilterListIcon aria-hidden="true" />}
               onClick={() => {
                 setSearchTerm('');
-                setStatusFilter('all');
                 setRoleFilter('all');
+                setStatusFilter('all');
+              }}
+              aria-label="Tüm filtreleri temizle"
+              sx={{ 
+                width: { xs: '100%', sm: 'auto' },
+                minWidth: { xs: '100%', sm: 'auto' },
               }}
             >
               Filtreleri Temizle
@@ -320,75 +355,188 @@ export default function UserManagement() {
       {/* Users Table */}
       <Card>
         <CardContent>
-          <TableContainer component={Paper} variant="outlined">
-            <Table>
+          <TableContainer 
+            component={Paper} 
+            variant="outlined"
+            aria-label="Kullanıcı listesi tablosu"
+          >
+            <Table role="table" aria-label="Kullanıcı bilgileri">
               <TableHead>
-                <TableRow>
-                  <TableCell>Kullanıcı</TableCell>
-                  <TableCell>İletişim</TableCell>
-                  <TableCell>Rol</TableCell>
-                  <TableCell>Durum</TableCell>
-                  <TableCell>Kayıt Tarihi</TableCell>
-                  <TableCell>Son Giriş</TableCell>
-                  <TableCell align="right">İşlemler</TableCell>
+                <TableRow role="row" aria-rowindex={1}>
+                  <TableCell 
+                    role="columnheader"
+                    aria-label="Kullanıcı avatar ve bilgileri"
+                    sx={{ 
+                      display: { xs: 'none', md: 'table-cell' },
+                      minWidth: { md: 120 }
+                    }}
+                  >
+                    Kullanıcı
+                  </TableCell>
+                  <TableCell 
+                    role="columnheader"
+                    aria-label="Kullanıcı adı"
+                    sx={{ 
+                      display: { xs: 'table-cell', md: 'table-cell' },
+                      minWidth: { xs: 80, md: 120 }
+                    }}
+                  >
+                    {isMobile ? 'Ad' : 'Ad Soyad'}
+                  </TableCell>
+                  <TableCell 
+                    role="columnheader"
+                    aria-label="E-posta adresi"
+                    sx={{ 
+                      display: { xs: 'none', sm: 'table-cell' },
+                      minWidth: { sm: 150 }
+                    }}
+                  >
+                    E-posta
+                  </TableCell>
+                  <TableCell 
+                    role="columnheader"
+                    aria-label="Kullanıcı rolü"
+                    sx={{ 
+                      display: { xs: 'none', md: 'table-cell' },
+                      minWidth: { md: 100 }
+                    }}
+                  >
+                    Rol
+                  </TableCell>
+                  <TableCell 
+                    role="columnheader"
+                    aria-label="Kullanıcı durumu"
+                    sx={{ 
+                      display: { xs: 'none', sm: 'table-cell' },
+                      minWidth: { sm: 100 }
+                    }}
+                  >
+                    Durum
+                  </TableCell>
+                  <TableCell 
+                    role="columnheader"
+                    aria-label="Kayıt tarihi"
+                    sx={{ 
+                      display: { xs: 'none', lg: 'table-cell' },
+                      minWidth: { lg: 120 }
+                    }}
+                  >
+                    Kayıt Tarihi
+                  </TableCell>
+                  <TableCell 
+                    role="columnheader"
+                    aria-label="İşlem butonları"
+                    align="right" 
+                    sx={{ minWidth: { xs: 60, sm: 80 } }}
+                  >
+                    İşlemler
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {paginatedUsers.map((user) => (
-                  <TableRow key={user.id} hover>
-                    <TableCell>
+                {paginatedUsers.map((user, index) => (
+                  <TableRow 
+                    key={user.id} 
+                    hover
+                    role="row"
+                    aria-rowindex={index + 2}
+                    aria-label={`${user.name} kullanıcısı`}
+                  >
+                    <TableCell 
+                      role="cell"
+                      aria-label={`${user.name} kullanıcısının avatar ve bilgileri`}
+                      sx={{ 
+                        display: { xs: 'none', md: 'table-cell' }
+                      }}
+                    >
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
-                          <PersonIcon />
+                        <Avatar 
+                          sx={{ mr: 2, bgcolor: 'primary.main' }}
+                          aria-label={`${user.name} kullanıcısının avatarı`}
+                        >
+                          {user.name.charAt(0)}
                         </Avatar>
                         <Box>
                           <Typography variant="body2" fontWeight="medium">
                             {user.name}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            ID: {user.id}
+                            {user.email}
                           </Typography>
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell>
-                      <Box>
-                        <Typography variant="body2">{user.email}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {user.phone}
+                    <TableCell 
+                      role="cell"
+                      aria-label={`Kullanıcı adı: ${user.name}`}
+                    >
+                      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                        <Typography variant="body2" fontWeight="medium">
+                          {user.name}
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>
+                    <TableCell 
+                      role="cell"
+                      aria-label={`E-posta: ${user.email}`}
+                      sx={{ 
+                        display: { xs: 'none', sm: 'table-cell' }
+                      }}
+                    >
+                      <Typography variant="body2">{user.email}</Typography>
+                    </TableCell>
+                    <TableCell 
+                      role="cell"
+                      aria-label={`Rol: ${getRoleText(user.role)}`}
+                      sx={{ 
+                        display: { xs: 'none', md: 'table-cell' }
+                      }}
+                    >
                       <Chip 
                         label={getRoleText(user.role)} 
                         size="small"
                         variant="outlined"
+                        aria-label={`${getRoleText(user.role)} rolü`}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell 
+                      role="cell"
+                      aria-label={`Durum: ${getStatusText(user.status)}`}
+                      sx={{ 
+                        display: { xs: 'none', sm: 'table-cell' }
+                      }}
+                    >
                       <Chip 
                         label={getStatusText(user.status)}
                         color={getStatusColor(user.status)}
                         size="small"
+                        aria-label={`${getStatusText(user.status)} durumu`}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell 
+                      role="cell"
+                      aria-label={`Kayıt tarihi: ${new Date(user.joinDate).toLocaleDateString('tr-TR')}`}
+                      sx={{ 
+                        display: { xs: 'none', lg: 'table-cell' }
+                      }}
+                    >
                       <Typography variant="body2">
                         {new Date(user.joinDate).toLocaleDateString('tr-TR')}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {new Date(user.lastLogin).toLocaleDateString('tr-TR')}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
+                    <TableCell 
+                      role="cell"
+                      align="right"
+                      aria-label="Kullanıcı işlemleri"
+                    >
                       <IconButton
                         onClick={(e) => handleMenuOpen(e, user)}
                         size="small"
+                        aria-label={`${user.name} için işlem menüsünü aç`}
+                        aria-haspopup="true"
+                        aria-expanded={Boolean(anchorEl)}
                       >
-                        <MoreVertIcon />
+                        <MoreVertIcon aria-hidden="true" />
                       </IconButton>
                     </TableCell>
                   </TableRow>

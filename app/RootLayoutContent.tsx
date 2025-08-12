@@ -5,6 +5,7 @@ import { CssBaseline, Box } from '@mui/material';
 import { useThemeStore } from '../store/themeStore';
 import { NotificationProvider } from '../components/ui/NotificationSystem';
 import ErrorBoundary from '../components/ui/ErrorBoundary';
+import { SkipToMainContent, BackToTop } from '../components/ui/Accessibility';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Geist } from "next/font/google";
@@ -57,27 +58,68 @@ export default function RootLayoutContent({
         900: mode === 'light' ? '#111827' : '#f9fafb',
       },
     },
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 600,
+        md: 900,
+        lg: 1200,
+        xl: 1536,
+        // Custom breakpoints for better mobile experience
+        mobile: 480,
+        tablet: 768,
+        desktop: 1024,
+      },
+    },
     typography: {
       fontFamily: geistSans.style.fontFamily,
       h1: {
         fontWeight: 700,
         letterSpacing: '-0.02em',
+        [theme.breakpoints.down('md')]: {
+          fontSize: '2rem',
+        },
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1.75rem',
+        },
       },
       h2: {
         fontWeight: 600,
         letterSpacing: '-0.01em',
+        [theme.breakpoints.down('md')]: {
+          fontSize: '1.75rem',
+        },
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1.5rem',
+        },
       },
       h3: {
         fontWeight: 600,
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1.25rem',
+        },
       },
       h4: {
         fontWeight: 600,
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '1.125rem',
+        },
       },
       h5: {
         fontWeight: 600,
       },
       h6: {
         fontWeight: 600,
+      },
+      body1: {
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '0.875rem',
+        },
+      },
+      body2: {
+        [theme.breakpoints.down('sm')]: {
+          fontSize: '0.8125rem',
+        },
       },
     },
     shape: {
@@ -91,6 +133,10 @@ export default function RootLayoutContent({
             fontWeight: 600,
             borderRadius: 8,
             padding: '10px 24px',
+            [theme.breakpoints.down('sm')]: {
+              padding: '8px 16px',
+              fontSize: '0.875rem',
+            },
           },
           contained: {
             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
@@ -103,30 +149,42 @@ export default function RootLayoutContent({
       MuiCard: {
         styleOverrides: {
           root: {
-            boxShadow: mode === 'light' 
-              ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-              : '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)',
-            border: mode === 'light' ? '1px solid #e5e7eb' : '1px solid #374151',
+            [theme.breakpoints.down('sm')]: {
+              borderRadius: 8,
+            },
           },
         },
       },
-      MuiAppBar: {
+      MuiTextField: {
         styleOverrides: {
           root: {
-            backdropFilter: 'blur(8px)',
-            backgroundColor: mode === 'light' 
-              ? 'rgba(255, 255, 255, 0.8)'
-              : 'rgba(26, 26, 46, 0.8)',
-            borderBottom: mode === 'light' 
-              ? '1px solid #e5e7eb'
-              : '1px solid #374151',
+            [theme.breakpoints.down('sm')]: {
+              '& .MuiInputBase-root': {
+                fontSize: '0.875rem',
+              },
+            },
           },
         },
       },
-      MuiPaper: {
+      MuiTable: {
         styleOverrides: {
           root: {
-            backgroundImage: 'none',
+            [theme.breakpoints.down('md')]: {
+              '& .MuiTableCell-root': {
+                padding: '8px 4px',
+                fontSize: '0.75rem',
+              },
+            },
+          },
+        },
+      },
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            [theme.breakpoints.down('sm')]: {
+              margin: 16,
+              width: 'calc(100% - 32px)',
+            },
           },
         },
       },

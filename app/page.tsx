@@ -9,21 +9,27 @@ import {
   Card,
   CardContent,
   CardActions,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { CalendarToday, Business, Person, Search } from '@mui/icons-material';
 import Link from 'next/link';
 
 export default function HomePage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: { xs: 2, sm: 4 } }}>
       {/* Hero Section */}
-      <Box sx={{ textAlign: 'center', mb: 8 }}>
+      <Box sx={{ textAlign: 'center', mb: { xs: 4, sm: 6, md: 8 } }}>
         <Box
           sx={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: 4,
-            p: 6,
-            mb: 4,
+            borderRadius: { xs: 2, sm: 3, md: 4 },
+            p: { xs: 3, sm: 4, md: 6 },
+            mb: { xs: 3, sm: 4 },
             position: 'relative',
             overflow: 'hidden',
             '&::before': {
@@ -38,31 +44,40 @@ export default function HomePage() {
           }}
         >
           <Typography 
-            variant="h2" 
+            variant={isMobile ? "h3" : isTablet ? "h2" : "h1"}
             component="h1" 
             gutterBottom
             sx={{
               color: 'white',
               fontWeight: 700,
               textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3rem' },
             }}
           >
             İş Randevu Sistemi
           </Typography>
           <Typography 
-            variant="h5" 
+            variant={isMobile ? "h6" : "h5"}
             sx={{ 
               color: 'rgba(255,255,255,0.9)',
-              mb: 4,
+              mb: { xs: 3, sm: 4 },
               fontWeight: 400,
+              fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
             }}
           >
             Yerel işletmelerle kolayca randevu bulun ve rezervasyon yapın
           </Typography>
-          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Box sx={{ 
+            mt: { xs: 3, sm: 4 }, 
+            display: 'flex', 
+            gap: { xs: 1, sm: 2 }, 
+            justifyContent: 'center', 
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: 'center',
+          }}>
             <Button
               variant="contained"
-              size="large"
+              size={isMobile ? "medium" : "large"}
               component={Link}
               href="/register"
               startIcon={<Person />}
@@ -73,13 +88,15 @@ export default function HomePage() {
                   bgcolor: 'rgba(255,255,255,0.9)',
                 },
                 fontWeight: 600,
+                width: { xs: '100%', sm: 'auto' },
+                maxWidth: { xs: '280px', sm: 'none' },
               }}
             >
               Başlayın
             </Button>
             <Button
               variant="outlined"
-              size="large"
+              size={isMobile ? "medium" : "large"}
               component={Link}
               href="/login"
               startIcon={<Search />}
@@ -91,6 +108,8 @@ export default function HomePage() {
                   bgcolor: 'rgba(255,255,255,0.1)',
                 },
                 fontWeight: 600,
+                width: { xs: '100%', sm: 'auto' },
+                maxWidth: { xs: '280px', sm: 'none' },
               }}
             >
               İşletme Bul
