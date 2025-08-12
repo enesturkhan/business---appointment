@@ -16,9 +16,22 @@ import {
   Select,
   MenuItem,
   FormHelperText,
+  Card,
+  CardContent,
+  Grid,
+  Stepper,
+  Step,
+  StepLabel,
+  Divider,
+  Chip,
 } from '@mui/material';
 import NextLink from 'next/link';
 import { useAuthStore } from '../../store/authStore';
+import {
+  Person as PersonIcon,
+  Business as BusinessIcon,
+  CheckCircle as CheckIcon,
+} from '@mui/icons-material';
 
 // Validation functions
 const validateEmail = (email: string): { isValid: boolean; message: string } => {
@@ -91,292 +104,650 @@ const validatePhone = (phone: string): { isValid: boolean; message: string } => 
   return { isValid: true, message: '' };
 };
 
-interface RegisterForm {
+const validateBusinessName = (name: string): { isValid: boolean; message: string } => {
+  if (!name) {
+    return { isValid: false, message: 'İşletme adı gereklidir' };
+  }
+  
+  if (name.length < 2) {
+    return { isValid: false, message: 'İşletme adı en az 2 karakter olmalıdır' };
+  }
+  
+  if (name.length > 100) {
+    return { isValid: false, message: 'İşletme adı en fazla 100 karakter olabilir' };
+  }
+  
+  return { isValid: true, message: '' };
+};
+
+const validateAddress = (address: string): { isValid: boolean; message: string } => {
+  if (!address) {
+    return { isValid: false, message: 'Adres gereklidir' };
+  }
+  
+  if (address.length < 10) {
+    return { isValid: false, message: 'Adres en az 10 karakter olmalıdır' };
+  }
+  
+  return { isValid: true, message: '' };
+};
+
+const validateDescription = (description: string): { isValid: boolean; message: string } => {
+  if (!description) {
+    return { isValid: false, message: 'Açıklama gereklidir' };
+  }
+  
+  if (description.length < 20) {
+    return { isValid: false, message: 'Açıklama en az 20 karakter olmalıdır' };
+  }
+  
+  if (description.length > 500) {
+    return { isValid: false, message: 'Açıklama en fazla 500 karakter olabilir' };
+  }
+  
+  return { isValid: true, message: '' };
+};
+
+interface UserRegisterForm {
   name: string;
   email: string;
   phone: string;
   password: string;
   confirmPassword: string;
-  role: 'user' | 'business_owner';
 }
+
+interface BusinessRegisterForm {
+  businessName: string;
+  ownerName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  address: string;
+  description: string;
+  category: string;
+}
+
+const businessCategories = [
+  'restaurant',
+  'cafe',
+  'retail',
+  'healthcare',
+  'beauty',
+  'automotive',
+  'education',
+  'entertainment',
+  'professional_services',
+  'other'
+];
+
+const categoryLabels: Record<string, string> = {
+  restaurant: 'Restoran',
+  cafe: 'Kafe',
+  retail: 'Perakende',
+  healthcare: 'Sağlık',
+  beauty: 'Güzellik',
+  automotive: 'Otomotiv',
+  education: 'Eğitim',
+  entertainment: 'Eğlence',
+  professional_services: 'Profesyonel Hizmetler',
+  other: 'Diğer'
+};
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
-  const [formData, setFormData] = useState<RegisterForm>({
+  const { register } = useAuthStore();
+  
+  // Step management
+  const [activeStep, setActiveStep] = useState(0);
+  const [selectedType, setSelectedType] = useState<'user' | 'business' | null>(null);
+  
+  // Form states
+  const [userForm, setUserForm] = useState<UserRegisterForm>({
     name: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'user',
   });
   
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
-  const [error, setError] = useState('');
+  const [businessForm, setBusinessForm] = useState<BusinessRegisterForm>({
+    businessName: '',
+    ownerName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    address: '',
+    description: '',
+    category: '',
+  });
+  
+  // Error states
+  const [userErrors, setUserErrors] = useState<Partial<UserRegisterForm>>({});
+  const [businessErrors, setBusinessErrors] = useState<Partial<BusinessRegisterForm>>({});
+  const [touched, setTouched] = useState<Partial<UserRegisterForm & BusinessRegisterForm>>({});
+  
+  // Loading and success states
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const validateField = (name: string, value: string) => {
-    let fieldError = '';
+  const steps = ['Hesap Türü Seçimi', 'Bilgi Girişi', 'Doğrulama'];
+
+  const handleTypeSelection = (type: 'user' | 'business') => {
+    setSelectedType(type);
+    setActiveStep(1);
+  };
+
+  const handleUserFormChange = (field: keyof UserRegisterForm, value: string) => {
+    setUserForm(prev => ({ ...prev, [field]: value }));
     
-    if (name === 'name') {
-      const nameValidation = validateName(value);
-      if (!nameValidation.isValid) {
-        fieldError = nameValidation.message;
-      }
-    } else if (name === 'email') {
-      const emailValidation = validateEmail(value);
-      if (!emailValidation.isValid) {
-        fieldError = emailValidation.message;
-      }
-    } else if (name === 'phone') {
-      const phoneValidation = validatePhone(value);
-      if (!phoneValidation.isValid) {
-        fieldError = phoneValidation.message;
-      }
-    } else if (name === 'password') {
-      const passwordValidation = validatePassword(value);
-      if (!passwordValidation.isValid) {
-        fieldError = passwordValidation.message;
-      }
-    } else if (name === 'confirmPassword') {
-      const confirmPasswordValidation = validateConfirmPassword(formData.password, value);
-      if (!confirmPasswordValidation.isValid) {
-        fieldError = confirmPasswordValidation.message;
-      }
+    // Clear error when user starts typing
+    if (userErrors[field]) {
+      setUserErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleBusinessFormChange = (field: keyof BusinessRegisterForm, value: string) => {
+    setBusinessForm(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error when user starts typing
+    if (businessErrors[field]) {
+      setBusinessErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateUserForm = (): boolean => {
+    const errors: Partial<UserRegisterForm> = {};
+    
+    const nameValidation = validateName(userForm.name);
+    if (!nameValidation.isValid) errors.name = nameValidation.message;
+    
+    const emailValidation = validateEmail(userForm.email);
+    if (!emailValidation.isValid) errors.email = emailValidation.message;
+    
+    const phoneValidation = validatePhone(userForm.phone);
+    if (!phoneValidation.isValid) errors.phone = phoneValidation.message;
+    
+    const passwordValidation = validatePassword(userForm.password);
+    if (!passwordValidation.isValid) errors.password = passwordValidation.message;
+    
+    const confirmPasswordValidation = validateConfirmPassword(userForm.password, userForm.confirmPassword);
+    if (!confirmPasswordValidation.isValid) errors.confirmPassword = confirmPasswordValidation.message;
+    
+    setUserErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateBusinessForm = (): boolean => {
+    const errors: Partial<BusinessRegisterForm> = {};
+    
+    const businessNameValidation = validateBusinessName(businessForm.businessName);
+    if (!businessNameValidation.isValid) errors.businessName = businessNameValidation.message;
+    
+    const ownerNameValidation = validateName(businessForm.ownerName);
+    if (!ownerNameValidation.isValid) errors.ownerName = ownerNameValidation.message;
+    
+    const emailValidation = validateEmail(businessForm.email);
+    if (!emailValidation.isValid) errors.email = emailValidation.message;
+    
+    const phoneValidation = validatePhone(businessForm.phone);
+    if (!phoneValidation.isValid) errors.phone = phoneValidation.message;
+    
+    const passwordValidation = validatePassword(businessForm.password);
+    if (!passwordValidation.isValid) errors.password = passwordValidation.message;
+    
+    const confirmPasswordValidation = validateConfirmPassword(businessForm.password, businessForm.confirmPassword);
+    if (!confirmPasswordValidation.isValid) errors.confirmPassword = confirmPasswordValidation.message;
+    
+    const addressValidation = validateAddress(businessForm.address);
+    if (!addressValidation.isValid) errors.address = addressValidation.message;
+    
+    const descriptionValidation = validateDescription(businessForm.description);
+    if (!descriptionValidation.isValid) errors.description = descriptionValidation.message;
+    
+    if (!businessForm.category) {
+      errors.category = 'Kategori seçimi gereklidir';
     }
     
-    setErrors(prev => ({
-      ...prev,
-      [name]: fieldError
-    }));
-    
-    return fieldError === '';
+    setBusinessErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  const validateForm = (): boolean => {
-    const nameValid = validateField('name', formData.name);
-    const emailValid = validateField('email', formData.email);
-    const phoneValid = validateField('phone', formData.phone);
-    const passwordValid = validateField('password', formData.password);
-    const confirmPasswordValid = validateField('confirmPassword', formData.confirmPassword);
-    
-    // Mark all fields as touched
-    setTouched({
-      name: true,
-      email: true,
-      phone: true,
-      password: true,
-      confirmPassword: true,
-    });
-    
-    return nameValid && emailValid && phoneValid && passwordValid && confirmPasswordValid;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     
-    // Validate form before submission
-    if (!validateForm()) {
+    if (!validateUserForm()) {
       return;
     }
     
     setIsLoading(true);
-
-    // Simüle edilmiş kayıt işlemi
-    setTimeout(() => {
-      // Başarılı kayıt sonrası giriş yap
-      login({
-        email: formData.email,
-        name: formData.name,
-        role: formData.role,
-      });
-      
-      if (formData.role === 'business_owner') {
-        router.push('/business/register');
-      } else {
-        router.push('/dashboard');
-      }
-      
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target;
+    setErrorMessage('');
     
-    if (name) {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+    try {
+      await register(userForm.name, userForm.email, userForm.password, 'user');
+      setSuccessMessage('Kullanıcı kaydı başarıyla tamamlandı! Giriş sayfasına yönlendiriliyorsunuz...');
+      setActiveStep(2);
       
-      // Real-time validation when field is touched
-      if (touched[name]) {
-        validateField(name, value as string);
-      }
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    } catch (error) {
+      setErrorMessage('Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyiniz.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleBusinessSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    setTouched(prev => ({
-      ...prev,
-      [name]: true
-    }));
+    if (!validateBusinessForm()) {
+      return;
+    }
     
-    validateField(name, value);
+    setIsLoading(true);
+    setErrorMessage('');
+    
+    try {
+      // Business owner registration
+      await register(businessForm.ownerName, businessForm.email, businessForm.password, 'business_owner');
+      setSuccessMessage('İşletme kaydı başarıyla tamamlandı! Giriş sayfasına yönlendiriliyorsunuz...');
+      setActiveStep(2);
+      
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    } catch (error) {
+      setErrorMessage('Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyiniz.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const isFormValid = () => {
-    return formData.name && formData.email && formData.phone && 
-           formData.password && formData.confirmPassword && 
-           Object.keys(errors).every(key => !errors[key]);
+  const handleBack = () => {
+    if (activeStep === 1) {
+      setActiveStep(0);
+      setSelectedType(null);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (activeStep) {
+      case 0:
+        return (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Hesap Türü Seçimi
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+              Hangi tür hesap oluşturmak istiyorsunuz?
+            </Typography>
+            
+            <Grid container spacing={3} justifyContent="center">
+              <Grid item xs={12} sm={6} md={4}>
+                <Card 
+                  sx={{ 
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 4,
+                    }
+                  }}
+                  onClick={() => handleTypeSelection('user')}
+                >
+                  <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                    <PersonIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+                    <Typography variant="h6" gutterBottom>
+                      Kullanıcı Hesabı
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Randevu almak ve hizmetleri kullanmak için
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={4}>
+                <Card 
+                  sx={{ 
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 4,
+                    }
+                  }}
+                  onClick={() => handleTypeSelection('business')}
+                >
+                  <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                    <BusinessIcon sx={{ fontSize: 64, color: 'secondary.main', mb: 2 }} />
+                    <Typography variant="h6" gutterBottom>
+                      İşletme Hesabı
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Hizmet sunmak ve randevu yönetimi için
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Box>
+        );
+        
+      case 1:
+        return selectedType === 'user' ? (
+          <Box component="form" onSubmit={handleUserSubmit} sx={{ py: 2 }}>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
+              Kullanıcı Kayıt Formu
+            </Typography>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Ad Soyad"
+                  value={userForm.name}
+                  onChange={(e) => handleUserFormChange('name', e.target.value)}
+                  error={!!userErrors.name}
+                  helperText={userErrors.name}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="E-posta"
+                  type="email"
+                  value={userForm.email}
+                  onChange={(e) => handleUserFormChange('email', e.target.value)}
+                  error={!!userErrors.email}
+                  helperText={userErrors.email}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Telefon"
+                  value={userForm.phone}
+                  onChange={(e) => handleUserFormChange('phone', e.target.value)}
+                  error={!!userErrors.phone}
+                  helperText={userErrors.phone}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Şifre"
+                  type="password"
+                  value={userForm.password}
+                  onChange={(e) => handleUserFormChange('password', e.target.value)}
+                  error={!!userErrors.password}
+                  helperText={userErrors.password}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Şifre Tekrarı"
+                  type="password"
+                  value={userForm.confirmPassword}
+                  onChange={(e) => handleUserFormChange('confirmPassword', e.target.value)}
+                  error={!!userErrors.confirmPassword}
+                  helperText={userErrors.confirmPassword}
+                  required
+                />
+              </Grid>
+            </Grid>
+            
+            <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Button
+                variant="outlined"
+                onClick={handleBack}
+                disabled={isLoading}
+              >
+                Geri
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Kaydediliyor...' : 'Kayıt Ol'}
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Box component="form" onSubmit={handleBusinessSubmit} sx={{ py: 2 }}>
+            <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 3 }}>
+              İşletme Kayıt Formu
+            </Typography>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="İşletme Adı"
+                  value={businessForm.businessName}
+                  onChange={(e) => handleBusinessFormChange('businessName', e.target.value)}
+                  error={!!businessErrors.businessName}
+                  helperText={businessErrors.businessName}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="İşletme Sahibi Adı"
+                  value={businessForm.ownerName}
+                  onChange={(e) => handleBusinessFormChange('ownerName', e.target.value)}
+                  error={!!businessErrors.ownerName}
+                  helperText={businessErrors.ownerName}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="E-posta"
+                  type="email"
+                  value={businessForm.email}
+                  onChange={(e) => handleBusinessFormChange('email', e.target.value)}
+                  error={!!businessErrors.email}
+                  helperText={businessErrors.email}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Telefon"
+                  value={businessForm.phone}
+                  onChange={(e) => handleBusinessFormChange('phone', e.target.value)}
+                  error={!!businessErrors.phone}
+                  helperText={businessErrors.phone}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Şifre"
+                  type="password"
+                  value={businessForm.password}
+                  onChange={(e) => handleBusinessFormChange('password', e.target.value)}
+                  error={!!businessErrors.password}
+                  helperText={businessErrors.password}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Şifre Tekrarı"
+                  type="password"
+                  value={businessForm.confirmPassword}
+                  onChange={(e) => handleBusinessFormChange('confirmPassword', e.target.value)}
+                  error={!!businessErrors.confirmPassword}
+                  helperText={businessErrors.confirmPassword}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth error={!!businessErrors.category}>
+                  <InputLabel>Kategori</InputLabel>
+                  <Select
+                    value={businessForm.category}
+                    onChange={(e) => handleBusinessFormChange('category', e.target.value)}
+                    label="Kategori"
+                  >
+                    {businessCategories.map((category) => (
+                      <MenuItem key={category} value={category}>
+                        {categoryLabels[category]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {businessErrors.category && (
+                    <FormHelperText>{businessErrors.category}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Adres"
+                  value={businessForm.address}
+                  onChange={(e) => handleBusinessFormChange('address', e.target.value)}
+                  error={!!businessErrors.address}
+                  helperText={businessErrors.address}
+                  required
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="İşletme Açıklaması"
+                  value={businessForm.description}
+                  onChange={(e) => handleBusinessFormChange('description', e.target.value)}
+                  error={!!businessErrors.description}
+                  helperText={businessErrors.description}
+                  required
+                  multiline
+                  rows={3}
+                />
+              </Grid>
+            </Grid>
+            
+            <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Button
+                variant="outlined"
+                onClick={handleBack}
+                disabled={isLoading}
+              >
+                Geri
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Kaydediliyor...' : 'İşletme Kaydı Oluştur'}
+              </Button>
+            </Box>
+          </Box>
+        );
+        
+      case 2:
+        return (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <CheckIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
+            <Typography variant="h5" component="h2" gutterBottom>
+              Kayıt Başarılı!
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {successMessage}
+            </Typography>
+          </Box>
+        );
+        
+      default:
+        return null;
+    }
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
-          }}
-        >
-          <Typography component="h1" variant="h5">
-            Kayıt Ol
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Üye Ol
           </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
-              {error}
-            </Alert>
-          )}
+          <Typography variant="body1" color="text.secondary">
+            Hesabınızı oluşturun ve hizmetlerimizden yararlanmaya başlayın
+          </Typography>
+        </Box>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="Ad Soyad"
-              name="name"
-              autoComplete="name"
-              autoFocus
-              value={formData.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.name && !!errors.name}
-              helperText={touched.name && errors.name}
-            />
-            
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="E-posta Adresi"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.email && !!errors.email}
-              helperText={touched.email && errors.email}
-            />
-            
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="phone"
-              label="Telefon Numarası"
-              name="phone"
-              autoComplete="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.phone && !!errors.phone}
-              helperText={touched.phone && errors.phone}
-            />
-            
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel>Hesap Türü</InputLabel>
-              <Select
-                name="role"
-                value={formData.role}
-                label="Hesap Türü"
-                onChange={handleChange}
-              >
-                <MenuItem value="user">Normal Kullanıcı</MenuItem>
-                <MenuItem value="business_owner">İşletme Sahibi</MenuItem>
-              </Select>
-            </FormControl>
-            
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Şifre"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.password && !!errors.password}
-              helperText={touched.password && errors.password}
-            />
-            
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Şifre Tekrarı"
-              type="password"
-              id="confirmPassword"
-              autoComplete="new-password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.confirmPassword && !!errors.confirmPassword}
-              helperText={touched.confirmPassword && errors.confirmPassword}
-            />
-            
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isLoading || !isFormValid()}
-              sx={{ mt: 3, mb: 2 }}
-            >
-              {isLoading ? 'Kayıt Yapılıyor...' : 'Kayıt Ol'}
-            </Button>
-            
-            <Box sx={{ textAlign: 'center' }}>
-              <Link component={NextLink} href="/login" variant="body2">
-                {"Zaten hesabınız var mı? Giriş Yapın"}
+        {/* Stepper */}
+        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+
+        {/* Error and Success Messages */}
+        {errorMessage && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {errorMessage}
+          </Alert>
+        )}
+        
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            {successMessage}
+          </Alert>
+        )}
+
+        {/* Step Content */}
+        {renderStepContent()}
+
+        {/* Login Link */}
+        {activeStep === 0 && (
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <Divider sx={{ mb: 2 }}>
+              <Chip label="veya" />
+            </Divider>
+            <Typography variant="body2">
+              Zaten hesabınız var mı?{' '}
+              <Link component={NextLink} href="/login" underline="hover">
+                Giriş yapın
               </Link>
-            </Box>
+            </Typography>
           </Box>
-        </Paper>
-      </Box>
+        )}
+      </Paper>
     </Container>
   );
 }
